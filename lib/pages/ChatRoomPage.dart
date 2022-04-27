@@ -22,6 +22,8 @@ class ChatRoomPage extends StatefulWidget {
 
 class _ChatRoomPageState extends State<ChatRoomPage> {
 
+
+
   TextEditingController messageController = TextEditingController();
 
   void sendMessage() async {
@@ -51,20 +53,38 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
+        title: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance.collection("users").doc(widget.userModel.uid).snapshots(),
+          builder: (context , snapshot) {
+            if(snapshot.data != null) {
+              return
+                Row(
+                  children: [
 
-            CircleAvatar(
-              backgroundColor: Colors.grey[300],
-              backgroundImage: NetworkImage(widget.targetUser.profilepic.toString()),
-            ),
+                    CircleAvatar(
+                      backgroundColor: Colors.grey[300],
+                      backgroundImage: NetworkImage(widget.targetUser.profilepic.toString()),
+                    ),
 
-            SizedBox(width: 10,),
+                    SizedBox(width: 10,),
 
-            Text(widget.targetUser.fullname.toString()),
+                    Column(
+                      children: [
+                        Text(widget.targetUser.fullname.toString()),
+                        SizedBox(height: 5,),
+                        Text(
+                             snapshot.data!['status'],
+                            style: const TextStyle(fontSize: 12),),
+                      ],
+                    ),
 
-          ],
-        ),
+                  ],
+                );
+            }else{
+              return Container();
+            }
+          },
+        )
       ),
       body: SafeArea(
         child: Container(

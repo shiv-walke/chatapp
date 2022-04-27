@@ -1,13 +1,11 @@
 import 'package:chatapp/models/ChatRoomModel.dart';
 import 'package:chatapp/models/FirebaseHelper.dart';
-import 'package:chatapp/models/UIHelper.dart';
 import 'package:chatapp/models/UserModel.dart';
 import 'package:chatapp/pages/ChatRoomPage.dart';
 import 'package:chatapp/pages/LoginPage.dart';
 import 'package:chatapp/pages/SearchPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,7 +18,36 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addObserver(this);
+    setStatus("Online");
+  }
+
+  void setStatus(String status) async {
+    await _firestore.collection("users").doc(widget.userModel.uid).update(
+        {"status": status});
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state){
+
+    if (state == AppLifecycleState.resumed) {
+      //online
+      setStatus("Online");
+    }
+    else{
+      //offline
+      setStatus("Offline");
+    }
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
